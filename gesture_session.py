@@ -1,7 +1,7 @@
 import time
 
 class GestureSession:
-    def __init__(self,arm_duration = 3.0,grace_period =2.0):
+    def __init__(self,arm_duration,grace_period):
         self.armed  = False
         self.expire_at = 0 
         self.arm_duration = arm_duration
@@ -30,7 +30,7 @@ class GestureSession:
     def time_left(self):
         if not self.armed:
             return 0
-        return max(0,self.expire_at - time.time()-self.grace_period)
+        return max(0,self.expire_at - time.time())
     
     def progress(self):
         if not self.armed:
