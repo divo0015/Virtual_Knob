@@ -2,12 +2,21 @@ import math
 import numpy as np
 import cv2
 from finger_state import fingers_up
+from collections import deque
 
 FIST_HOLD_FRAMES = 8
 PINCH_MIN = 25
 PINCH_MAX = 200
-
+_pinch_history = deque(maxlen=5)
 _fist_counter = 0
+
+def get_smooth_pinch_distance(lm_list):
+    dist = get_pinch_distance(lm_list)
+    if dist is None:
+        _pinch_history.clear()
+        return None
+    _pinch_history.append(dist)
+    return sum(_pinch_history)/len(_pinch_history)
 
 def check_fist(lm_list):
     global _fist_counter
