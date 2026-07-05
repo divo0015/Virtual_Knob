@@ -32,7 +32,7 @@ The session auto-locks after a few seconds of no gesture activity.
 
 ### Step 1 — Clone or download the project
 ```bash
-git clone https://github.com/yourname/virtual-knob
+git clone https://github.com/divo0015/virtual-knob
 cd virtual-knob
 ```
 
