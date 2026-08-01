@@ -98,32 +98,6 @@ virtual_knob/
 
 ---
 
-## Tuning
-
-If gestures feel too sensitive or not sensitive enough, adjust these
-constants at the top of each file:
-
-**gestures.py**
-```python
-FIST_HOLD_FRAMES    = 8     # frames fist must be held (~0.3s at 30fps)
-PINCH_MIN           = 25    # pixel distance = 0% volume
-PINCH_MAX           = 200   # pixel distance = 100% volume
-PINCH_ACTIVE_THRESHOLD = 80 # below this = intentional pinch
-```
-
-**gesture_session.py**
-```python
-arm_duration  = 6.0   # seconds session stays active
-grace_period  = 2.0   # seconds to wait after arming before gestures fire
-```
-
-To find your real PINCH_MIN and PINCH_MAX:
-1. Add `print(get_pinch_distance(lm_list))` in your loop temporarily
-2. Pinch fingers fully closed → note the value → that's your MIN
-3. Spread thumb and index fully apart → note the value → that's your MAX
-
----
-
 ## Planned Features
 - [ ] Next track gesture
 - [ ] Previous track gesture
