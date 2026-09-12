@@ -3,6 +3,29 @@ FINGER_TIPS = [8,12,16,20]
 FINGER_BASES = [5,9,13,17]
 FINGER_NAMES = ["index","middle","ring","pinky"]
 
+
+
+def check_shaka(lm_list):
+    """
+    Thumb + pinky extended, middle three folded.
+    Works for both hands — handedness tells you which action.
+    """
+    if not lm_list:
+        return False
+
+    # pinky tip above its base knuckle = up
+    pinky_up   = lm_list[20][2] < lm_list[17][2]
+
+    # index, middle, ring tips BELOW their bases = folded
+    index_down  = lm_list[8][2]  > lm_list[5][2]
+    middle_down = lm_list[12][2] > lm_list[9][2]
+    ring_down   = lm_list[16][2] > lm_list[13][2]
+
+    # thumb tip far from index base horizontally = extended
+    thumb_out = abs(lm_list[4][1] - lm_list[5][1]) > 40
+
+    return pinky_up and index_down and middle_down and ring_down and thumb_out
+
 def fingers_up(lm_list):
     if not lm_list:
         return [0,0,0,0]

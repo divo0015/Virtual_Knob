@@ -9,7 +9,24 @@ PINCH_MIN = 25
 PINCH_MAX = 200
 _pinch_history = deque(maxlen=5)
 _fist_counter = 0
+# in gestures.py — open palm detector
+_palm_counter = 0
+PALM_HOLD_FRAMES = 10
 
+def check_open_palm(lm_list):
+    """All 4 fingers up [1,1,1,1] held → enter volume mode."""
+    global _palm_counter
+    if not lm_list:
+        _palm_counter = 0
+        return False
+    if fingers_up(lm_list) == [1, 1, 1, 1]:
+        _palm_counter += 1
+    else:
+        _palm_counter = 0
+    if _palm_counter == PALM_HOLD_FRAMES:
+        _palm_counter = 0
+        return True
+    return False
 def get_smooth_pinch_distance(lm_list):
     dist = get_pinch_distance(lm_list)
     if dist is None:
