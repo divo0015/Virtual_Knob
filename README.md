@@ -1,170 +1,208 @@
-# 🤙 Virtual Knob
-Control media playback and system volume using hand gestures — no keyboard, no mouse.
+# 🎛️ Virtual Knob
 
-Built with Python, OpenCV, and MediaPipe.
+A webcam-based hand gesture controller for controlling system media and volume without touching the keyboard or mouse.
 
----
+Built with **Python, OpenCV, MediaPipe, PyAutoGUI and Windows audio controls**.
 
-## Gestures
+## ✨ Features
 
-| Gesture | Action |
-|---|---|
-| 🤙 Web-shooter sign (index + pinky up) | **Arm the system** |
-| ✊ Fist held for ~0.3s | **Play / Pause** |
-| 🤏 Thumb + index pinch | **Volume control** (spread = louder, close = quieter) |
-| Spacebar | **Arm the system** (keyboard shortcut) |
-| Q | **Quit** |
+* 🖐️ Webcam-based hand tracking
+* 🎯 Gesture-based activation
+* ▶️ Play / Pause media
+* ⏭️ Next track
+* ⏮️ Previous track
+* 🔊 Touchless volume control
+* 📏 Pinch-distance based volume mapping
+* 🛡️ Activation delay to reduce accidental triggers
+* 📊 On-screen HUD and FPS display
 
-### How activation works
-The system is **LOCKED** by default and ignores all gestures.
-Show the web-shooter sign (or press spacebar) to **ARM** it.
-A 2-second grace period starts (cyan ring), then the system goes **ACTIVE** (green ring).
-The session auto-locks after a few seconds of no gesture activity.
+## 🚀 Usage
 
----
+### 1. Clone the repository
 
-## Installation
-
-### Requirements
-- Python 3.9 or higher
-- A webcam
-- Windows (see Mac section below for differences)
-
-### Step 1 — Clone or download the project
 ```bash
-git clone https://github.com/divo0015/virtual-knob
+git clone <your-repository-url>
 cd virtual-knob
 ```
 
-### Step 2 — Create a virtual environment (recommended)
+### 2. Create a virtual environment
+
 ```bash
 python -m venv .venv
+```
 
-# Windows
+Activate it on Windows:
+
+```bash
 .venv\Scripts\activate
-
-# Mac / Linux
-source .venv/bin/activate
 ```
 
-### Step 3 — Install dependencies
+### 3. Install dependencies
 
-**Windows:**
 ```bash
-pip install opencv-python mediapipe pyautogui numpy pycaw comtypes
+pip install -r requirements.txt
 ```
 
-**Mac:**
-```bash
-pip install opencv-python mediapipe pyautogui numpy
-```
-> Mac uses the built-in `osascript` for volume — no extra install needed.
-> Swap `volume_control.py` for the Mac version (see below).
+### 4. Start the controller
 
-### Step 4 — Run
 ```bash
 python main.py
 ```
 
----
+Make sure your webcam is connected and accessible before starting the application.
 
-## Mac Compatibility
+## 🖐️ Gesture Controls
 
-| Feature | Windows | Mac |
-|---|---|---|
-| Hand detection | ✅ | ✅ |
-| Gesture activation | ✅ | ✅ |
-| Play / Pause | ✅ | ✅ |
-| Volume control | ✅ pycaw | ✅ osascript (no install) |
-| Webcam feed + HUD | ✅ | ✅ |
+| Gesture                             | Hand   | Action                    |
+| ----------------------------------- | ------ | ------------------------- |
+| 🤏 Web-shooter / activation gesture | Either | Activate controller       |
+| ✊ Fist                              | Either | Play / Pause              |
+| 🤙 Shaka                            | Right  | Next track                |
+| 🤙 Shaka                            | Left   | Previous track            |
+| 🖐️ Open palm                       | Either | Enter volume-control mode |
+| 🤏 Pinch                            | Either | Adjust volume             |
 
-**To run on Mac:** replace `volume_control.py` with the Mac version that uses
-`subprocess` + `osascript` instead of pycaw. Everything else is identical.
+### Activation
 
----
+Perform the activation gesture and hold it for approximately **1 second**.
 
-## File Structure
+Once activated, the controller enters the gesture-control session.
 
-```
-virtual_knob/
-├── main.py              # Entry point — main loop and activation logic
-├── hand_tracker.py      # HandTracker class wrapping MediaPipe Hands
-├── finger_state.py      # fingers_up(), is_arm_gesture()
-├── gesture_session.py   # GestureSession — armed/locked state machine
-├── gestures.py          # check_fist(), pinch detection, smoothing
-├── volume_control.py    # System volume wrapper (pycaw on Windows)
-└── ui.py                # HUD overlay — ring, volume bar, FPS, labels
-```
+The activation delay is intentional to prevent accidental activation.
 
----
+### Media Controls
 
-## Planned Features
-- [ ] Next track gesture
-- [ ] Previous track gesture
-- [ ] On-screen gesture guide overlay
-- [ ] Config file for thresholds (no code editing needed)
+**Fist**
 
----
+Close your hand into a fist to toggle:
 
-## Troubleshooting
-
-**Camera not opening**
-Try changing `cv2.VideoCapture(0)` to `cv2.VideoCapture(1)` in `main.py`.
-Run this to find the right index:
-```python
-import cv2
-for i in range(4):
-    cap = cv2.VideoCapture(i)
-    print(f"Index {i}: {'works' if cap.read()[0] else 'no camera'}")
-    cap.release()
+```text
+Play ↔ Pause
 ```
 
-**MediaPipe import error**
-```bash
-pip uninstall mediapipe -y
-pip install mediapipe==0.10.9
+**Right-hand Shaka**
+
+Use the thumb + pinky gesture with your **right hand** to skip to the next track.
+
+**Left-hand Shaka**
+
+Use the same gesture with your **left hand** to go to the previous track.
+
+### Volume Control
+
+Show an **open palm** to enter volume-control mode.
+
+Then use a **pinching gesture** between your thumb and index finger.
+
+The distance between the two fingers is measured in pixels:
+
+```text
+Thumb ●────────● Index
+          ↑
+     pixel distance
 ```
 
-**pycaw error on Windows**
-```bash
-pip install pycaw comtypes
+The measured distance is mapped to the system volume range:
+
+```text
+finger distance
+       ↓
+pixel measurement
+       ↓
+volume mapping
+       ↓
+system volume
 ```
-Make sure you're running from inside your virtual environment.
 
-**Gestures fire too easily / not at all**
-Print your raw values first, then tune the constants in `gestures.py`.
-See the Tuning section above.
+Moving the fingers closer or farther apart changes the volume.
 
----
+## ⚙️ How It Works
 
-## Dependencies
+The application uses the webcam to capture frames and detect hand landmarks.
 
-| Package | Version tested | Purpose |
-|---|---|---|
-| opencv-python | 4.9+ | Webcam feed and drawing |
-| mediapipe | 0.10.9 | Hand landmark detection |
-| pyautogui | 0.9+ | Play/pause media key |
-| numpy | 1.24+ | Interpolation and smoothing |
-| pycaw | 0.0.8 | Windows volume control |
-| comtypes | 1.2+ | Required by pycaw on Windows |
+The processing pipeline is roughly:
 
+```text
+Webcam
+   ↓
+OpenCV
+   ↓
+Hand Landmark Detection
+   ↓
+Gesture Recognition
+   ↓
+Gesture Session
+   ↓
+Action Mapping
+   ↓
+System Media / Volume Control
+```
 
-For Mac Users, 
-change the code in the file named "volume_control.py" 
+The project is divided into separate modules:
 
-from ctypes import cast,POINTER 
-from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-import cv2
-def get_volume_controller():
-    devices = AudioUtilities.GetSpeakers()
-    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-    volume = cast (interface , POINTER(IAudioEndpointVolume))
-    return volume 
+```text
+main.py
+hand_tracker.py
+finger_state.py
+gestures.py
+gesture_session.py
+volume_control.py
+ui.py
+```
 
-def set_volume(volume_ctrl , level_float):
-    level_float = max(0.0, min (1.0,level_float))
-    volume_ctrl.SetMasterVolumeLevelScalar(level_float,None)
+### Main Components
 
-def get_volume(volume_ctrl):
-    return volume_ctrl.GetMasterVolumeLevelScalar()
+**`hand_tracker.py`**
+
+Handles webcam frames and hand landmark detection.
+
+**`finger_state.py`**
+
+Determines finger states and higher-level gestures.
+
+**`gestures.py`**
+
+Contains gesture detection, pinch-distance calculation and volume mapping.
+
+**`gesture_session.py`**
+
+Manages activation and the current gesture-control session.
+
+**`volume_control.py`**
+
+Handles reading and changing the system volume.
+
+**`ui.py`**
+
+Draws the HUD and calculates/display FPS.
+
+**`main.py`**
+
+Connects all components and runs the main control loop.
+
+## 🛠️ Tech Stack
+
+* **Python**
+* **OpenCV** — webcam processing
+* **MediaPipe** — hand landmark detection
+* **PyAutoGUI** — keyboard/media interaction
+* **NumPy** — numerical operations
+* **Windows Core Audio / audio controller** — system volume control
+
+## ⚠️ Notes
+
+* A working webcam is required.
+* Good lighting improves gesture detection.
+* Keep your hand clearly visible to the camera.
+* The controller is currently designed around a fixed camera position and controlled environment.
+* Gesture recognition may occasionally produce false positives depending on lighting, hand position and camera quality.
+
+## 🔮 Future Improvements
+
+* Better gesture robustness
+* Calibration for different users and camera positions
+* Improved filtering/smoothing for volume control
+* More media controls
+* Customizable gestures
+* Support for additional operating systems
+* Machine-learning based gesture classification
