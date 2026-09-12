@@ -6,10 +6,6 @@ FINGER_NAMES = ["index","middle","ring","pinky"]
 
 
 def check_shaka(lm_list):
-    """
-    Thumb + pinky extended, middle three folded.
-    Works for both hands — handedness tells you which action.
-    """
     if not lm_list:
         return False
 

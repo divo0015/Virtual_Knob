@@ -9,7 +9,6 @@ PINCH_MIN = 25
 PINCH_MAX = 200
 _pinch_history = deque(maxlen=5)
 _fist_counter = 0
-# in gestures.py — open palm detector
 _palm_counter = 0
 PALM_HOLD_FRAMES = 10
 
