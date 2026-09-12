@@ -32,7 +32,7 @@ The session auto-locks after a few seconds of no gesture activity.
 
 ### Step 1 — Clone or download the project
 ```bash
-git clone https://github.com/yourname/virtual-knob
+git clone https://github.com/divo0015/virtual-knob
 cd virtual-knob
 ```
 
@@ -98,32 +98,6 @@ virtual_knob/
 
 ---
 
-## Tuning
-
-If gestures feel too sensitive or not sensitive enough, adjust these
-constants at the top of each file:
-
-**gestures.py**
-```python
-FIST_HOLD_FRAMES    = 8     # frames fist must be held (~0.3s at 30fps)
-PINCH_MIN           = 25    # pixel distance = 0% volume
-PINCH_MAX           = 200   # pixel distance = 100% volume
-PINCH_ACTIVE_THRESHOLD = 80 # below this = intentional pinch
-```
-
-**gesture_session.py**
-```python
-arm_duration  = 6.0   # seconds session stays active
-grace_period  = 2.0   # seconds to wait after arming before gestures fire
-```
-
-To find your real PINCH_MIN and PINCH_MAX:
-1. Add `print(get_pinch_distance(lm_list))` in your loop temporarily
-2. Pinch fingers fully closed → note the value → that's your MIN
-3. Spread thumb and index fully apart → note the value → that's your MAX
-
----
-
 ## Planned Features
 - [ ] Next track gesture
 - [ ] Previous track gesture
@@ -173,3 +147,24 @@ See the Tuning section above.
 | numpy | 1.24+ | Interpolation and smoothing |
 | pycaw | 0.0.8 | Windows volume control |
 | comtypes | 1.2+ | Required by pycaw on Windows |
+
+
+For Mac Users, 
+change the code in the file named "volume_control.py" 
+
+from ctypes import cast,POINTER 
+from comtypes import CLSCTX_ALL
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+import cv2
+def get_volume_controller():
+    devices = AudioUtilities.GetSpeakers()
+    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+    volume = cast (interface , POINTER(IAudioEndpointVolume))
+    return volume 
+
+def set_volume(volume_ctrl , level_float):
+    level_float = max(0.0, min (1.0,level_float))
+    volume_ctrl.SetMasterVolumeLevelScalar(level_float,None)
+
+def get_volume(volume_ctrl):
+    return volume_ctrl.GetMasterVolumeLevelScalar()
